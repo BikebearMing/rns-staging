@@ -1,69 +1,119 @@
-import Image from "next/image";
-import styles from "./page.module.css";
+import Staircase from "./staircase";
 
 export default function Home() {
   return (
-    <div className={styles.page}>
-      <main className={styles.main}>
-        <Image
-          className={styles.logo}
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className={styles.intro}>
-          <h1>
-            To get started, edit the{" "}
-            <code className={styles.code}>page.js</code> file.
-          </h1>
-          <p>
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              target="_blank"
-              rel="noopener noreferrer"
-            >
-              Learning
-            </a>{" "}
-            center.
+    <main>
+      {/* star dust for the sections BELOW the hero (the hero has the neuron
+          field in its own canvas); fades in as the hero scrolls off */}
+      <canvas className="stars" aria-hidden />
+      <section className="section hero">
+        {/* Lives inside the pinned hero: identical while pinned, scrolls away
+            with it after — later sections sit straight on the lava. */}
+        <Staircase />
+        <h1 className="h1">
+          {/* .line = GSAP exit layer; inner span = CSS entrance layer (blur/mask/sheen) */}
+          <span className="line">
+            <span>Attention Fades.</span>
+          </span>
+          <span className="line shift">
+            <span>Memories Last.</span>
+          </span>
+        </h1>
+        {/* enters as the h1 wipe (1.2s–3.65s) lands, just before the sheen */}
+        <p className="body" data-text-reveal data-text-reveal-delay="4.5">
+          We design brand experience, engineered to be remembered.
+        </p>
+      </section>
+      <div className="scroll-hint mono">SCROLL</div>
+      <section className="section about">
+        <p className="h5 subhead" data-text-reveal>WHO WE ARE</p>
+        <h2 className="h2" data-blur-reveal>
+          We are The Memory Makers. We design brand experiences engineered to
+          be remembered. Built on neuroscience. Made to be felt. And for every
+          memory we create, we give one back to a community that needs it most.
+        </h2>
+      </section>
+      <section className="section video-section">
+        <div className="video-frame">
+          <video src="/video/reel.mp4" muted playsInline loop preload="metadata" />
+          <button className="unmute mono" type="button">UNMUTE</button>
+        </div>
+      </section>
+      <section className="section clients">
+        {/* whole block wears the dark gradient (clipped to the text);
+            .active overrides with the bright animated one. Mastercard is
+            active on arrival; hover moves it and swaps the awards list. */}
+        <h2 className="clients-list" aria-label="Clients">
+          {["HSBC", "Mastercard", "Diageo", "JLL", "Heineken", "Visa",
+            "Jaguar Land Rover", "Johnnie Walker"].map((name, i) => (
+            <span key={name}>
+              {i > 0 && " / "}
+              <span className={`client${name === "Mastercard" ? " active" : ""}`} data-client={name}>
+                {name}
+              </span>
+            </span>
+          ))}
+        </h2>
+        <div className="awards">
+          <p className="h5 mono awards-label">AWARDS</p>
+          <ul className="awards-list body">
+            <li>2025 Marketing-Interactive Agency of the Year Singapore</li>
+            <li>Marketing-Interactive Agency of the Year 2020</li>
+            <li>British Chamber of Commerce Singapore, 19th Annual Business Awards</li>
+            <li>MARKies Awards 2021</li>
+            <li>Marketing Events Awards 2023</li>
+          </ul>
+        </div>
+      </section>
+      <section className="section services">
+        <div className="services-intro">
+          <p className="h5 subhead" data-text-reveal>OUR SERVICES</p>
+          <h3 className="h4 services-title">From concept<br />to execution.</h3>
+          <button className="mono view-all" type="button">VIEW ALL</button>
+        </div>
+        {/* Strategy active on arrival; hover moves the focus — inactive rows
+            blur back, the active one gets its bullet + thumbnail */}
+        <ul className="services-list">
+          {["Strategy", "Creative", "Marketing", "Events"].map((s, i) => (
+            <li key={s} className={`service${i === 0 ? " active" : ""}`}>
+              <span className="h3 service-name">{s}</span>
+              <img className="service-thumb" src={`/stair/${i + 1}.jpg`} alt="" />
+            </li>
+          ))}
+        </ul>
+      </section>
+      <section className="section work">
+        <p className="h5 subhead work-label" data-text-reveal>OUR WORK</p>
+        {/* full-bleed triptych; images parallax on scroll (initWork) */}
+        <div className="work-grid">
+          {[
+            ["Johnnie Walker Vault,", "The Couture Blend"],
+            ["Mastercard x McLaren:", "Singapore Grand Prix 2025"],
+            ["Diageo: Johnnie Walker", "Blue Label, Depth Of Blue"],
+          ].map(([l1, l2], i) => (
+            <figure className="work-item" key={i}>
+              <img src={`/work/${i + 1}.jpg`} alt="" />
+              <figcaption className="work-caption">{l1}<br />{l2}</figcaption>
+            </figure>
+          ))}
+        </div>
+      </section>
+      {/* mock: 30px side padding, 32px off the bottom; locations sit 37px
+          above the wordmark, the social pip 50px above the meta line */}
+      <footer className="footer">
+        <div>
+          <p className="mono footer-locations">SINGAPORE / UK / UAE</p>
+          <img className="footer-logo" src="/rns-logo.svg" alt="Rebel &amp; Soul" />
+        </div>
+        <div className="footer-right">
+          <a className="footer-social mono" href="https://www.linkedin.com/company/rebel-and-soul/"
+             target="_blank" rel="noreferrer" aria-label="LinkedIn">in</a>
+          <p className="footer-meta">
+            <span className="body">© Rebel and Soul. All rights reserved 2026</span>
+            <a className="body" href="#">Privacy policy</a>
           </p>
         </div>
-        <div className={styles.ctas}>
-          <a
-            className={styles.primary}
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className={styles.logo}
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={14}
-            />
-            Deploy Now
-          </a>
-          <a
-            className={styles.secondary}
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
-        </div>
-      </main>
-    </div>
+      </footer>
+    </main>
   );
 }

@@ -1,0 +1,721 @@
+/* Rebel & Soul — site styles. Build from the mock here. */
+
+:root {
+  --bg: #0a0a0a;
+  --fg: #f2f0ea;
+  --sidepadding-xs: 2.083vw;
+}
+
+body {
+  background: var(--bg);
+  color: var(--fg);
+  font-family: system-ui, sans-serif;
+}
+
+.lava {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  z-index: -1;
+}
+
+main {
+  position: relative;
+  z-index: 1; /* above the fixed lava */
+  transition: opacity 1.2s ease 0.6s;
+}
+body.preloading main {
+  opacity: 0;
+  transition: none;
+}
+
+/* The preloader logo doesn't fade out — it glides up and shrinks into the
+   header position, becoming the site logo. */
+.preloader {
+  position: fixed;
+  inset: 0;
+  z-index: 5;
+  display: grid;
+  place-items: center;
+  pointer-events: none;
+}
+.preloader img {
+  width: min(40vw, 320px);
+  transition: transform 1.4s cubic-bezier(0.55, 0, 0.25, 1) 0.25s;
+}
+.preloader.done img {
+  /* center travels from 50vh to the header line (~49px @1440); translate
+     is listed before scale so it isn't scaled down with the logo */
+  transform: translateY(calc(3.4vw - 50vh)) scale(0.53);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  main,
+  .preloader,
+  .preloader img {
+    transition: none;
+  }
+  .hero .h1 .line > span,
+  .subhead::before {
+    animation: none !important;
+  }
+}
+
+.lab {
+  position: fixed;
+  top: 12px;
+  right: 12px;
+  z-index: 10;
+  display: grid;
+  gap: 4px;
+  padding: 12px;
+  background: rgba(0, 0, 0, 0.6);
+  border-radius: 8px;
+  font: 11px/1.4 monospace;
+}
+.lab label {
+  display: grid;
+  grid-template-columns: 52px 120px 48px;
+  align-items: center;
+  gap: 8px;
+}
+.lab button {
+  margin-top: 4px;
+  padding: 4px;
+  font: inherit;
+  cursor: pointer;
+}
+
+.section {
+  min-height: 100vh;
+  display: grid;
+  place-items: center;
+}
+
+/* type — vw values are px / 14.4 (1440 design width) */
+.h1 {
+  font-family: "ivyora-display", serif;
+  font-weight: 300;
+  font-size: 5.2083vw; /* 75px */
+  line-height: 1; /* 75px */
+  letter-spacing: -0.2083vw; /* -3px */
+  color: #d8efe7;
+}
+.h2 {
+  font-family: var(--font-geist), system-ui, sans-serif;
+  font-weight: 300;
+  font-size: 2.4306vw; /* 35px */
+  line-height: 1.1429; /* 40px */
+  letter-spacing: -0.0729vw; /* -1.05px */
+  text-align: center;
+  color: var(--fg);
+}
+.h3 {
+  font-family: "ivyora-display", serif;
+  font-weight: 300;
+  font-size: 3.8194vw; /* 55px */
+  line-height: 1.3636; /* 75px */
+  letter-spacing: -0.1528vw; /* -2.2px */
+}
+.h4 {
+  font-family: var(--font-geist), system-ui, sans-serif;
+  font-weight: 300;
+  font-size: 2.7778vw; /* 40px */
+  line-height: 1.125; /* 45px */
+  letter-spacing: -0.0833vw; /* -1.2px */
+}
+.h5 {
+  font-family: var(--font-geist-mono), monospace;
+  font-weight: 400;
+  font-size: 0.9722vw; /* 14px */
+  line-height: 1.1429; /* 16px */
+  letter-spacing: 0.0486vw; /* 0.7px */
+}
+.subhead {
+  color: #49a291;
+  display: flex;
+  align-items: center;
+  gap: 0.8333vw; /* 12px dot -> text */
+}
+.subhead::before {
+  content: "";
+  width: 0.5556vw; /* 8px */
+  height: 0.5556vw;
+  border-radius: 50%;
+  /* explicit color: the blur-reveal makes the element's color transparent */
+  background: #49a291;
+  box-shadow: 0 0 0.8333vw 0.2083vw #49a291; /* soft glow halo */
+  animation: dot-pulse 2.2s ease-in-out infinite;
+}
+@keyframes dot-pulse {
+  0%, 100% { opacity: 0.45; transform: scale(0.85); }
+  50% { opacity: 1; transform: scale(1.15); }
+}
+
+.body {
+  font-family: var(--font-geist), system-ui, sans-serif;
+  font-weight: 400;
+  font-size: 1.1111vw; /* 16px */
+  line-height: 1.375; /* 22px */
+  letter-spacing: -0.0333vw; /* -0.48px */
+  color: rgba(216, 239, 231, 0.75);
+}
+
+/* Text reveal (see initTextReveal in custom.js).
+   Hidden until SplitText has wrapped the letters so nothing flashes unclipped. */
+[data-text-reveal] {
+  visibility: hidden;
+}
+
+.mono {
+  font-family: var(--font-geist-mono), monospace;
+  font-weight: 400;
+  font-size: 0.8333vw; /* 12px */
+  line-height: 1.3333; /* 16px */
+  letter-spacing: 0.0417vw; /* 0.6px */
+}
+
+.scroll-hint {
+  position: fixed;
+  left: 1.3889vw; /* 20px */
+  bottom: 1.3889vw;
+  color: var(--fg);
+}
+
+/* WHO WE ARE — centered stack over the lava, riding a bit high of center */
+.about {
+  grid-template-columns: none;
+  align-content: center;
+  justify-items: center;
+  gap: 1.3889vw; /* 20px subhead -> h2 */
+  padding-bottom: 14vh; /* lifts the centered block ~7vh above true center */
+}
+.about .h2 {
+  max-width: 60.1389vw; /* 866px */
+}
+
+/* Star dust below the hero — fixed behind the content, above the lava;
+   initStars (custom.js) drives the drift and the scroll fade-in. */
+.stars {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  z-index: -1; /* behind main's content, above the root-level lava */
+  pointer-events: none;
+  opacity: 0;
+}
+
+/* Video section — pinned; the frame grows from a centered 400px card to
+   full viewport (15px side gutters) via initVideoExpand in custom.js. */
+.video-frame {
+  position: relative;
+  height: 400px;
+  aspect-ratio: 16 / 9;
+  border-radius: 5px;
+  overflow: hidden;
+}
+.video-frame video {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+.video-frame .unmute {
+  position: absolute;
+  right: 15px;
+  bottom: 15px;
+  padding: 8px 16px;
+  background: rgba(0, 25, 26, 0.55);
+  color: var(--fg);
+  border: 1px solid rgba(242, 240, 234, 0.25);
+  border-radius: 999px;
+  cursor: pointer;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.3s ease;
+}
+.video-frame.expanded .unmute {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+/* OUR SERVICES — intro column left, service list right. One service is in
+   focus (crisp, bullet, thumbnail); the rest blur back into the dark.
+   Hover moves the focus (initServices in custom.js). Mock @1440: 30 left,
+   list column at 485, 15 subhead->title, 25 title->button, 25/25 around
+   each divider, thumb 178x89 at 50 from the right edge. */
+.services {
+  display: grid;
+  place-items: normal; /* see .clients — Chrome 123+ applies the .section centering to block/grid children */
+  align-content: start;
+  grid-template-columns: 39vw 1fr; /* intro column 39vw; list fills the rest */
+  padding: 4.7222vw var(--sidepadding-xs) 4.7222vw; /* 68px top */
+}
+.services-intro {
+  justify-self: start;
+}
+.services-title {
+  margin-top: 1.0417vw; /* 15px */
+  color: var(--fg);
+}
+.view-all {
+  margin-top: 1.7361vw; /* 25px */
+  display: inline-flex;
+  align-items: center;
+  gap: 0.8333vw; /* 12px text -> dot */
+  padding: 0.7639vw 1.25vw; /* 11px 18px */
+  font: inherit; /* .mono sets the type */
+  letter-spacing: 0.0417vw;
+  color: #d8efe7;
+  background: rgba(0, 25, 26, 0.4);
+  border: 1px solid rgba(133, 212, 224, 0.22);
+  border-radius: 999px;
+  cursor: pointer;
+}
+.view-all::after {
+  content: "";
+  width: 0.4167vw; /* 6px */
+  height: 0.4167vw;
+  border-radius: 50%;
+  background: #49a291;
+  box-shadow: 0 0 0.5556vw 0.1389vw #49a291;
+}
+.services-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  padding-right: 1.3889vw; /* dividers end 50px from the viewport edge (30 + 20) */
+}
+.service {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1.7361vw 0; /* 25px above/below each divider */
+  cursor: pointer;
+  position: relative;
+}
+.service:first-child {
+  padding-top: 0;
+}
+.service-name {
+  position: relative;
+  color: #d8efe7;
+  filter: blur(0);
+  transition: transform 0.5s ease, filter 0.5s ease, color 0.5s ease;
+}
+/* bullet rides 35px left of the name; the name slides right to make room.
+   Same dot as .subhead: 8px #49a291, glow halo, dot-pulse. */
+.service-name::before {
+  content: "";
+  position: absolute;
+  left: -2.4306vw; /* 35px */
+  top: 50%;
+  margin-top: -0.2778vw; /* center the 8px dot */
+  width: 0.5556vw; /* 8px */
+  height: 0.5556vw;
+  border-radius: 50%;
+  background: #49a291;
+  box-shadow: 0 0 0.8333vw 0.2083vw #49a291;
+  opacity: 0;
+  transition: opacity 0.5s ease;
+}
+.service.active .service-name {
+  transform: translateX(2.4306vw); /* 35px — room for the bullet */
+}
+.service.active .service-name::before {
+  opacity: 1;
+  /* pulse only while active — dot-pulse animates opacity, which would
+     otherwise override the hidden state on inactive rows */
+  animation: dot-pulse 2.2s ease-in-out infinite;
+}
+.service:not(.active) .service-name {
+  color: #397f71; /* sunk into the dark */
+  filter: blur(5px);
+}
+.service-thumb {
+  width: 12.3611vw; /* 178px */
+  height: 6.1806vw; /* 89px */
+  object-fit: cover;
+  border-radius: 5px;
+  opacity: 0;
+  transform: scale(0.92);
+  transition: opacity 0.5s ease, transform 0.5s ease;
+}
+.service.active .service-thumb {
+  opacity: 1;
+  transform: scale(1);
+}
+
+/* OUR WORK — full-bleed 100vh triptych. Images sit oversized in clipped
+   columns; initWork (custom.js) scrubs them vertically for the parallax.
+   Mock: subhead 25 from top / 25 above the grid, captions 40/40 in each
+   image's bottom-left corner. */
+.work {
+  display: flex;
+  place-items: normal; /* see .clients — .section's centering leaks into flex/block children (Chrome 123+) */
+  flex-direction: column;
+  height: 100vh;
+  min-height: 0;
+  padding-top: 1.7361vw; /* 25px */
+  gap: 1.7361vw; /* 25px subhead -> grid */
+}
+.work-label {
+  margin-left: var(--sidepadding-xs);
+}
+.work-grid {
+  flex: 1;
+  min-height: 0;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+}
+.work-item {
+  position: relative;
+  margin: 0;
+  overflow: hidden;
+}
+.work-item img {
+  display: block;
+  /* oversized on BOTH axes: height = parallax headroom (initWork scrubs
+     yPercent within it), width = room for the hover blur's soft edges to
+     fall outside the clip instead of showing seams */
+  width: 116%; /* >= 3x the hover blur radius of slack on each side */
+  max-width: none; /* globals.css caps images at 100% — that clipped the slack */
+  height: 114%;
+  position: relative;
+  top: -7%;
+  left: -8%;
+  object-fit: cover;
+  will-change: transform;
+  transition: filter 0.45s ease;
+}
+/* hovering one panel frosts the other two: blur + desaturate the image and
+   sink the caption. filter only — GSAP owns the image's transform for the
+   parallax (one owner per property). */
+.work-grid:hover .work-item:not(:hover) img {
+  filter: blur(10px) saturate(0.7) brightness(0.72);
+}
+.work-grid:hover .work-item:not(:hover) .work-caption {
+  opacity: 0.35;
+}
+
+/* captions must stay legible over any photo (the mock's are all dark) */
+.work-item::after {
+  content: "";
+  position: absolute;
+  inset: auto 0 0;
+  height: 40%;
+  background: linear-gradient(rgba(0, 25, 26, 0), rgba(0, 25, 26, 0.75));
+  pointer-events: none;
+}
+.work-caption {
+  position: absolute;
+  z-index: 1; /* above the scrim */
+  left: 2.7778vw; /* 40px */
+  bottom: 2.7778vw;
+  font-family: var(--font-geist), system-ui, sans-serif;
+  font-weight: 400;
+  font-size: 1.3889vw; /* 20px */
+  line-height: 1.3; /* 26px */
+  letter-spacing: -0.0417vw;
+  color: var(--fg);
+  transition: opacity 0.45s ease;
+}
+
+/* Clients — big IvyOra roll-call; the whole block wears a dark green
+   gradient clipped to the glyphs, the active client wears the bright one
+   (animated shimmer). Awards block bottom-right syncs to the hovered
+   client (initClients in custom.js). Measurements from mock @1440:
+   68 top / 30 sides / awards at left 748, right 117, top 68+300+52. */
+.clients {
+  display: block; /* not the .section centering grid */
+  place-items: normal; /* .section's center now applies to BLOCK children too (Chrome 123+) */
+  position: relative;
+  padding: 4.7222vw var(--sidepadding-xs) 0; /* 68px top, 30px sides */
+}
+/* This section sits on darker ground. The scrim OVERFLOWS the section by
+   half a viewport at each end so its ramp is ~600px long instead of ending
+   at the section edge — a short ramp reads as a visible seam against the
+   brighter lava. z-index -1 keeps it behind all section text. */
+.clients::before {
+  content: "";
+  position: absolute;
+  inset: -50vh 0;
+  z-index: -1;
+  pointer-events: none;
+  background-image: linear-gradient(
+    rgba(0, 17, 18, 0) 0%,
+    rgba(0, 17, 18, 0.42) 36%,
+    rgba(0, 17, 18, 0.42) 64%,
+    rgba(0, 17, 18, 0) 100%
+  );
+}
+.clients-list {
+  font-family: "ivyora-display", serif;
+  font-weight: 300;
+  font-size: 5.2083vw; /* 75px */
+  line-height: 1; /* 75px */
+  letter-spacing: -0.2083vw; /* -3px */
+  /* full measure — the roll-call sets in TWO lines (mock): HSBC…Heineken,
+     then Visa…Johnnie Walker */
+  color: transparent; /* the clipped gradients paint the glyphs */
+  /* grow the background box past the line boxes, then pull the layout back
+     with matching negative margins: background-clip:text paints nothing
+     outside the box, so IvyOra's overhangs (the J descender, the leading
+     J's left swash) were being cut off the gradient */
+  padding: 0.3em 0.12em;
+  margin: -0.3em -0.12em;
+  background-image: linear-gradient(266deg, #00715b 26.85%, rgba(0, 113, 91, 0) 115.38%);
+  -webkit-background-clip: text;
+  background-clip: text;
+}
+/* The spans must carry NO background of their own: any background layer on
+   a descendant (even fully transparent) breaks the parent's whole-block
+   text paint in Chrome into per-word patches. The active state is instead a
+   ::after OVERLAY carrying the same text with the bright gradient, melted
+   in/out with an opacity transition — the parent's block-wide dark gradient
+   underneath is never disturbed. */
+.clients-list .client {
+  cursor: pointer;
+  position: relative;
+  display: inline-block; /* anchors the overlay; names wrap as whole units */
+}
+.clients-list .client::after {
+  content: attr(data-client);
+  position: absolute;
+  /* grow the box past the line box, then pad the text back into place —
+     background can't paint outside the box, so descenders/overhangs were
+     getting the gradient CUT off at the box edge (same trick as the h1) */
+  inset: -0.35em -0.15em;
+  padding: 0.35em 0.15em;
+  color: transparent;
+  /* layer 1: wide soft sheen swell (parked off-right), layer 2: active gradient */
+  background-image: linear-gradient(100deg, rgba(255, 255, 255, 0) 30%, rgba(255, 255, 255, 0.35) 50%, rgba(255, 255, 255, 0) 70%),
+    linear-gradient(92deg, #d3f9f2 25.28%, #89f9e4 109.23%);
+  background-size: 250% 100%, 100% 100%;
+  background-position: 200% 0, 0 0;
+  -webkit-background-clip: text;
+  background-clip: text;
+  opacity: 0;
+  transition: opacity 0.9s ease;
+  pointer-events: none;
+}
+.clients-list .client.active::after {
+  opacity: 1;
+  /* ocean swell: the sheen rolls across, then washes back — alternate, not
+     a repeating one-way glint; delayed so the melt lands first */
+  animation: client-shimmer 4.5s ease-in-out 0.5s infinite alternate;
+}
+@keyframes client-shimmer {
+  from { background-position: 200% 0, 0 0; }
+  to { background-position: -100% 0, 0 0; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .clients-list .client.active::after { animation: none; }
+}
+/* flows under the roll-call (100px below it) rather than being pinned to a
+   fixed top — the text block's height moves with the wrap */
+.clients .awards {
+  margin: 6.9444vw 6.0417vw 0 49.8611vw; /* 100 top / right edge at 117 / left edge at 748 */
+}
+.awards-label {
+  color: #49a291;
+}
+.awards-list {
+  list-style: none;
+  padding: 1.3889vw 0 0; /* 20px rule -> first item */
+  margin: 1.3889vw 0 0; /* 20px label -> rule */
+  position: relative;
+  display: grid;
+  gap: 0.5556vw; /* 8px -> 30px baseline rhythm at 22px line-height */
+  color: rgba(216, 239, 231, 0.6);
+}
+/* the swoosh blurs per WORD, not per container — each word un-blurs on its
+   own cascading delay (inline animation-delay from initClients), so the
+   reveal edge follows the word shapes instead of a box */
+.awards-list .w {
+  display: inline-block; /* filter needs a box; words stay whole */
+}
+.awards-list.swoosh .w {
+  animation: awards-swoosh 0.8s ease-in-out both;
+}
+@keyframes awards-swoosh {
+  from {
+    filter: blur(8px);
+    opacity: 0;
+  }
+  to {
+    filter: blur(0);
+    opacity: 1;
+  }
+}
+@media (prefers-reduced-motion: reduce) {
+  .awards-list.swoosh .w { animation: none; }
+}
+
+.hero {
+  position: relative; /* anchors the staircase canvas (absolute, z -1) */
+  grid-template-columns: none;
+  align-content: center;
+  justify-items: center;
+  gap: 2.5vw;
+  perspective: 62.5vw; /* 900px @1440 — text exits recede (translateZ) toward the hero's center */
+}
+.hero .h1 {
+  display: flex;
+  flex-direction: column;
+  transform-style: preserve-3d; /* .line translateZ shares the hero's vanishing point */
+}
+.hero .h1 .line {
+  display: block;
+}
+.hero .h1 .line > span {
+  display: block;
+  color: transparent;
+  /* room for the blur halo — the mask clips at the border box, so grow it invisibly */
+  padding: 0.8em;
+  margin: -0.8em;
+  /* layer 1: blue sheen band (rests off-right), layer 2: final mint->blue gradient */
+  background-image: linear-gradient(100deg, rgba(160, 225, 255, 0) 42%, rgba(170, 230, 255, 0.9) 50%, rgba(160, 225, 255, 0) 58%),
+    linear-gradient(90deg, #e8f7ee 0%, #cfeee6 45%, #a9dbe6 75%, #8fd0e0 100%);
+  background-size: 250% 100%, 100% 100%;
+  background-position: -100% 0, 0 0;
+  -webkit-background-clip: text;
+  background-clip: text;
+  /* soft-edged wipe mask; position 0 = fully revealed */
+  -webkit-mask-image: linear-gradient(90deg, #000 35%, transparent 65%);
+  mask-image: linear-gradient(90deg, #000 35%, transparent 65%);
+  -webkit-mask-size: 300% 100%;
+  mask-size: 300% 100%;
+  -webkit-mask-position: 0 0;
+  mask-position: 0 0;
+}
+.hero .h1 .shift {
+  margin-left: 16vw;
+}
+
+/* two beats, started when the preloader releases the page */
+body:not(.preloading) .hero .h1 .line > span {
+  animation: h1-reveal 2.2s ease-in-out 1.2s backwards, h1-sheen 1.3s ease 3.6s backwards;
+}
+body:not(.preloading) .hero .h1 .line:nth-child(2) > span {
+  animation-delay: 1.45s, 3.85s;
+}
+@keyframes h1-reveal {
+  from {
+    -webkit-mask-position: 100% 0;
+    mask-position: 100% 0;
+    filter: blur(14px);
+  }
+  to {
+    -webkit-mask-position: 0 0;
+    mask-position: 0 0;
+    filter: blur(0);
+  }
+}
+@keyframes h1-sheen {
+  from { background-position: 200% 0, 0 0; }
+  to { background-position: -100% 0, 0 0; }
+}
+
+/* The h1 entrance, generalized: LINE-BY-LINE blur-wipe + gradient sheen for
+   any element tagged data-blur-reveal. custom.js splits it into .br-line
+   divs (staggered via inline animation-delay) and adds .br-in on enter.
+   --fill sets the text color (background-clip: text paints it). */
+[data-blur-reveal] {
+  visibility: hidden; /* until SplitText has wrapped the lines */
+}
+[data-blur-reveal] .br-line {
+  color: transparent;
+  /* horizontal halo only — vertical spill merges with the adjacent lines */
+  padding: 0 0.5em;
+  margin: 0 -0.5em;
+  background-image: linear-gradient(100deg, rgba(160, 225, 255, 0) 42%, rgba(170, 230, 255, 0.9) 50%, rgba(160, 225, 255, 0) 58%),
+    linear-gradient(var(--fill, var(--fg)), var(--fill, var(--fg)));
+  background-size: 250% 100%, 100% 100%;
+  background-position: -100% 0, 0 0;
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-mask-image: linear-gradient(90deg, #000 35%, transparent 65%);
+  mask-image: linear-gradient(90deg, #000 35%, transparent 65%);
+  -webkit-mask-size: 300% 100%;
+  mask-size: 300% 100%;
+  -webkit-mask-position: 100% 0;
+  mask-position: 100% 0;
+  filter: blur(14px);
+}
+[data-blur-reveal].br-in .br-line {
+  /* wipe fills BOTH ways (hidden through its delay, revealed after — the
+     base state is hidden); sheen only needs backwards (base = parked off) */
+  animation: h1-reveal 1.8s ease-in-out both, h1-sheen 1.3s ease backwards;
+}
+
+/* Dividers draw left -> right as each row scrolls in (initLineReveal adds
+   .line-in). The rules are pseudo-elements, not borders, so they can scale. */
+.service::after,
+.awards-list::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: rgba(216, 239, 231, 0.14);
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 0.9s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.service::after { bottom: 0; }
+.awards-list::before { top: 0; background: rgba(216, 239, 231, 0.16); }
+.service.line-in::after,
+.awards-list.line-in::before { transform: scaleX(1); }
+@media (prefers-reduced-motion: reduce) {
+  .service::after,
+  .awards-list::before { transition: none; }
+}
+
+/* Footer — left: locations over the wordmark; right: social pip over the
+   meta line, both flush to the same 30px gutter (mock @1440). */
+.footer {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  padding: 6.9444vw 2.0833vw 2.2222vw; /* 100 / 30 / 32 */
+}
+.footer-locations {
+  color: rgba(216, 239, 231, 0.5);
+  margin: 0 0 2.5694vw; /* 37px -> wordmark */
+}
+.footer-logo {
+  display: block;
+  width: 24.3056vw; /* 350px */
+}
+.footer-right {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 3.4722vw; /* 50px pip -> meta line */
+}
+.footer-social {
+  display: grid;
+  place-items: center;
+  width: 2.3611vw; /* 34px */
+  height: 2.3611vw;
+  border-radius: 50%;
+  background: rgba(216, 239, 231, 0.12);
+  color: #d8efe7;
+  text-decoration: none;
+}
+.footer-meta {
+  display: flex;
+  align-items: baseline;
+  gap: 2.7778vw; /* 40px */
+  margin: 0;
+  color: rgba(216, 239, 231, 0.5);
+}
+.footer-meta .body { /* beats .body's own color */
+  color: inherit;
+}
+.footer-meta a {
+  text-decoration: none;
+}
