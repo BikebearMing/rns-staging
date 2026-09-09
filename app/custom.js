@@ -198,6 +198,14 @@ function initVideoExpand() {
     if (cancelled || !frame) return;
     const video = frame.querySelector("video");
     const btn = frame.querySelector(".unmute");
+    const after = document.querySelector(".video-section").nextElementSibling; // grab before the pin spacer wraps it
+    let expand = 0, enter = 0, exit = 0; // → window.__videoDim (lava darkens, stars recede)
+    const setDim = () => {
+      const near = enter * (1 - exit);
+      window.__videoDim = expand * near; // lava darkens with the expansion
+      window.__starDim = (0.45 + 0.55 * expand) * near; // stars start receding on approach
+    };
+    const OPEN = 0.6; // fraction of the pin spent growing; the rest holds full size
     ctx = gsap.context(() => {
       gsap.timeline({
         scrollTrigger: {
@@ -205,28 +213,47 @@ function initVideoExpand() {
           start: "top top",
           end: "+=100%",
           pin: true,
-          scrub: true,
+          scrub: true, // Lenis already smooths the scroll — extra scrub lag felt sluggish
           invalidateOnRefresh: true, // re-read innerWidth/Height on resize
           onUpdate(self) {
-            const expanded = self.progress > 0.95;
-            frame.classList.toggle("expanded", expanded);
-            if (expanded) video.play().catch(() => {});
-            else video.pause();
+            expand = Math.min(1, self.progress / OPEN);
+            setDim();
+            frame.classList.toggle("expanded", self.progress > OPEN * 0.9);
           },
         },
-      }).to(frame, {
-        width: () => innerWidth - 30,
-        height: () => innerHeight,
-        ease: "none",
-      });
-      // pin's onUpdate goes quiet once progress sticks at 1 — pause when the
-      // expanded video actually scrolls out of view, resume when it returns
+      })
+        .to(frame, {
+          width: () => innerWidth - 30,
+          height: () => innerHeight,
+          ease: "power2.out", // most of the growth lands early — reads responsive
+          duration: OPEN,
+        })
+        .to({}, { duration: 1 - OPEN }); // hold
+      // plays whenever any of it is on screen (not just once expanded).
+      // ScrollTrigger measures ends with pins reverted, so plain "bottom top"
+      // paused it at the pin end with the video still on screen — add the
+      // pin's own length (+=100% = innerHeight)
       ScrollTrigger.create({
         trigger: ".video-section",
         start: "top bottom",
-        end: "bottom top",
-        onLeave: () => video.pause(),
-        onEnterBack: () => frame.classList.contains("expanded") && video.play().catch(() => {}),
+        end: () => "bottom+=" + innerHeight + " top",
+        onToggle: (self) => (self.isActive ? video.play().catch(() => {}) : video.pause()),
+      });
+      // the darkening follows the frame on screen: builds as it arrives
+      // (matters once latched at full size) and lifts as the next section
+      // rises over it
+      ScrollTrigger.create({
+        trigger: ".video-section",
+        start: "top bottom",
+        end: "top top",
+        onUpdate: (self) => { enter = self.progress; setDim(); },
+        onRefresh: (self) => { enter = self.progress; setDim(); },
+      });
+      after && ScrollTrigger.create({
+        trigger: after,
+        start: "top bottom",
+        end: "top top",
+        onUpdate: (self) => { exit = self.progress; setDim(); },
       });
     });
     btn.addEventListener("click", () => {
@@ -286,7 +313,7 @@ function initStars() {
   resize();
   addEventListener("resize", resize);
 
-  let fade = 0;
+  let fade = 0, sd = 0;
   let raf, last = performance.now();
   const tick = (now) => {
     raf = requestAnimationFrame(tick);
@@ -294,6 +321,12 @@ function initStars() {
     last = now;
     if (fade <= 0) return; // invisible: skip the work, stars hold position
     g.clearRect(0, 0, w, h);
+    // video expanding: stars fall back — shrink/fade and converge toward the
+    // centre like a dolly-back. sd chases __starDim so the shift glides
+    // instead of jumping with the scroll
+    sd += ((window.__starDim || 0) - sd) * Math.min(1, dt * 4);
+    const push = 1 - 0.7 * sd;
+    const zoom = 1 - 0.22 * sd;
     for (const s of stars) {
       if (!reduced) {
         s.x += (s.vx * dt * dpr) / w;
@@ -302,9 +335,9 @@ function initStars() {
         if (s.x < -0.03) s.x = 1.03;
         else if (s.x > 1.03) s.x = -0.03;
       }
-      const r = s.r * dpr;
-      g.globalAlpha = s.a;
-      g.drawImage(sp, s.x * w - r, s.y * h - r, r * 2, r * 2);
+      const r = s.r * dpr * push;
+      g.globalAlpha = s.a * push;
+      g.drawImage(sp, (0.5 + (s.x - 0.5) * zoom) * w - r, (0.5 + (s.y - 0.5) * zoom) * h - r, r * 2, r * 2);
     }
   };
   raf = requestAnimationFrame(tick);

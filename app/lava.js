@@ -125,7 +125,7 @@ const FRAGS = {
   display: `${H}
   uniform sampler2D uVel;
   uniform vec2 uRes;
-  uniform float uT, uWarp, uScroll, uGap, uCount, uReveal, uGlowX;
+  uniform float uT, uWarp, uScroll, uGap, uCount, uReveal, uGlowX, uDim;
   uniform vec3 uSizes;
   float blob(vec2 p, vec2 c, float r) {
     vec2 d = p - c;
@@ -160,6 +160,7 @@ const FRAGS = {
     vec3 col = mix(base, c0, smoothstep(0.1, 0.7, f));
     col = mix(col, c1, smoothstep(0.5, 1.3, f));
     col = mix(col, c2, smoothstep(1.1, 2.2, f));
+    col = mix(col, base * 0.6, uDim * 0.7); /* video expanding: field sinks toward the dark */
     col += (fract(sin(dot(gl_FragCoord.xy, vec2(12.9898, 78.233))) * 43758.5453) - 0.5) / 128.0;
     o = vec4(col, 1.0);
   }`,
@@ -294,6 +295,7 @@ export default function Lava() {
       gl.uniform1f(d.u.uCount, Math.min(24, Math.ceil(document.documentElement.scrollHeight / minDim / P.gap) + 1));
       gl.uniform1f(d.u.uReveal, reveal);
       gl.uniform1f(d.u.uGlowX, glowX);
+      gl.uniform1f(d.u.uDim, window.__videoDim || 0); // set by initVideoExpand (custom.js)
       blit(d, null, simTexel);
     };
 

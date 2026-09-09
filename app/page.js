@@ -1,5 +1,8 @@
 import Staircase from "./staircase";
 
+// sections below the video showreel are hidden until they are ready
+const SHOW_WIP = false;
+
 export default function Home() {
   return (
     <main>
@@ -39,6 +42,7 @@ export default function Home() {
           <button className="unmute mono" type="button">UNMUTE</button>
         </div>
       </section>
+      {SHOW_WIP && (<>
       <section className="section clients">
         {/* whole block wears the dark gradient (clipped to the text);
             .active overrides with the bright animated one. Mastercard is
@@ -114,6 +118,7 @@ export default function Home() {
           </p>
         </div>
       </footer>
+      </>)}
     </main>
   );
 }
