@@ -166,6 +166,10 @@ const FRAGS = {
   }`,
 };
 
+// Lava shader hidden — LiquidEther (layout.js) is the background now; only the
+// preloader sequencing runs. /bg-2 (app/bg-2/page.js) brings the lava back.
+const hidden = () => !location.pathname.startsWith("/bg-2");
+
 export default function Lava() {
   const ref = useRef(null);
   const preRef = useRef(null);
@@ -173,6 +177,23 @@ export default function Lava() {
   useEffect(() => {
     const canvas = ref.current;
     const pre = preRef.current;
+    if (hidden()) {
+      let dead = false;
+      document.documentElement.style.overflow = "hidden";
+      const startReveal = () => {
+        if (dead) return;
+        dead = true;
+        pre.classList.add("done");
+        document.body.classList.remove("preloading");
+        document.documentElement.style.overflow = "";
+        window.lenis?.start();
+        dispatchEvent(new Event("rns:reveal"));
+      };
+      if (new URLSearchParams(location.search).has("nopre")) startReveal();
+      const loaded = new Promise((r) => document.readyState === "complete" ? r() : addEventListener("load", r, { once: true }));
+      Promise.all([loaded, new Promise((r) => setTimeout(r, 2800))]).then(startReveal);
+      return () => { dead = true; document.documentElement.style.overflow = ""; };
+    }
     const gl = canvas.getContext("webgl2", { antialias: false, depth: false, stencil: false, alpha: false });
     if (!gl || !gl.getExtension("EXT_color_buffer_float")) {
       // no WebGL2 float targets -> CSS bg only, skip the preloader entirely

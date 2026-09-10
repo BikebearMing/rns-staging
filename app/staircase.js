@@ -30,10 +30,12 @@ const N = 6;
 const START = { y: -20, pitch: -5, off: 13 };
 const REST = { y: 0, pitch: -1.6, off: 0 }; /* negative pitch: upcoming cards wind DOWNWARD */
 const INTRO_SECS = 4.2;
-const FRONT_Y = -0.25; /* anchor the front pose locks to; lowered ~30% of view height so the top card reads centered */
-const REST_ANGLE = -0.5; /* viewing pose: front card swung right + receded; cards cycle through it */
-const GROW_START = 0.85; /* cards rest slightly small and scale up to 1 across the scroll */
-const CAM_Z = 6.2; /* rest camera sits close — the front card reads big, so the zoom-out has travel */
+const FRONT_Y = 0.79; /* rest height of the front card (REST_ANGLE compensated out below, so this is the card's actual y) */
+const REST_ANGLE = -0.8; /* viewing pose: front card swung right + receded; cards cycle through it */
+const PITCH_START = 1.35; /* rest gap multiplier — cards sit further apart, closing to 1x across the scroll */
+const RADIUS_START = 0.85; /* rest helix radius multiplier — the swing peaks lower, opening to 1x across the scroll */
+const GROW_START = 0.72; /* cards rest small and scale up to 1 across the scroll */
+const CAM_Z = 7.4; /* rest camera (user: 6.2 was too close/large) — the front card reads mid-size, the zoom-out still has travel */
 /* Depth layer: the camera pulls BACK across the first slice of the pin
    (real parallax: the front card shrinks faster than the deep ones and more
    helix rises into view) — layered ON TOP of the spin, which runs over the
@@ -497,11 +499,12 @@ function Card({ i, vals }) {
     const a = i * v.step + v.spinTotal;
     // v.y is the intro rise (0 once settled); deeper cards lag it so the
     // helix assembles top-first instead of lifting as one rigid unit
-    const y = v.y * (1 + i * INTRO_STAG) + (i - v.iFront) * v.pitch + FRONT_Y;
+    // - REST_ANGLE/step cancels the rest pose's share of iFront, so FRONT_Y places the front card itself
+    const y = v.y * (1 + i * INTRO_STAG) + (i - v.iFront - REST_ANGLE / v.step) * v.pitch * v.pitchK + FRONT_Y;
     ref.current.position.y = y;
     ref.current.rotation.y = -a;
     ref.current.scale.setScalar(v.grow); // scales about the cylinder axis: face and radius together
-    const r = v.radius * v.grow;
+    const r = v.radius * v.grow * v.radiusK;
     const focusWorld = camera.position.z - r; // focus rides the front card, always sharp
     _center.set(-Math.sin(a) * r, y, Math.cos(a) * r);
     const d = _center.distanceTo(camera.position);
@@ -537,6 +540,8 @@ function Scene() {
     rippleVel: 0,
     step: (Math.PI * 2) / N,
     radius: 4.2,
+    pitchK: PITCH_START,
+    radiusK: RADIUS_START,
     winds: 1,
     scale: 1.5,
     bokeh: 3,
@@ -575,6 +580,8 @@ function Scene() {
     v.spinTotal = v.off + sway + REST_ANGLE - (spin * (N - 1) + exit * EXIT_STEPS) * v.step;
     v.iFront = -v.spinTotal / v.step; // continuous front index; +N-1 by full scroll
     v.grow = GROW_START + (1 - GROW_START) * spin; // small at rest, full size by the last card
+    v.pitchK = PITCH_START + (1 - PITCH_START) * spin; // wide gap at rest, original by the last card
+    v.radiusK = RADIUS_START + (1 - RADIUS_START) * spin; // lower peak at rest, original by the last card
   });
 
   useEffect(() => {

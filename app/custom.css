@@ -20,6 +20,21 @@ body {
   z-index: -1;
 }
 
+/* ReactBits LiquidEther (liquid-ether.js) — replaces the lava shader as the
+   site background; dims as the video expands (--video-dim from custom.js) */
+.ether {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  background: #031f1f; /* a hair lighter than the lava base #00191a, teal not green */
+  opacity: calc(1 - 0.7 * var(--video-dim, 0));
+}
+.liquid-ether-container { /* the component forces position:relative inline, so the fixed box is the wrapper */
+  width: 100%;
+  height: 100%;
+  touch-action: none;
+}
+
 main {
   position: relative;
   z-index: 1; /* above the fixed lava */
@@ -30,8 +45,8 @@ body.preloading main {
   transition: none;
 }
 
-/* The preloader logo doesn't fade out — it glides up and shrinks into the
-   header position, becoming the site logo. */
+/* The preloader logo wipes out left→right in a soft blur, then drops in
+   from above at header size and becomes the site logo. */
 .preloader {
   position: fixed;
   inset: 0;
@@ -42,19 +57,37 @@ body.preloading main {
 }
 .preloader img {
   width: min(40vw, 320px);
-  transition: transform 1.4s cubic-bezier(0.55, 0, 0.25, 1) 0.25s;
+  /* wipe mask: 3× wide, soft edge in the middle third; position 100% shows the
+     opaque third (visible), 0% the transparent third (gone) */
+  mask-image: linear-gradient(90deg, transparent 0 33%, #000 66%);
+  mask-size: 300% 100%;
+  mask-repeat: no-repeat;
+  mask-position: 100% 0;
 }
 .preloader.done img {
-  /* center travels from 50vh to the header line (~49px @1440); translate
-     is listed before scale so it isn't scaled down with the logo */
-  transform: translateY(calc(3.4vw - 50vh)) scale(0.53);
+  animation:
+    logo-out 0.7s cubic-bezier(0.6, 0, 0.4, 1) 0.15s forwards,
+    logo-in 0.9s cubic-bezier(0.2, 0.8, 0.2, 1) 1s forwards;
+}
+@keyframes logo-out {
+  to { mask-position: 0 0; filter: blur(10px); }
+}
+@keyframes logo-in {
+  /* header center ≈ 3.4vw from top @1440; scale listed after translate so the
+     travel isn't scaled with the logo */
+  from { mask-position: 100% 0; filter: blur(6px); opacity: 0; transform: translateY(-60vh) scale(0.53); }
+  to   { mask-position: 100% 0; filter: blur(0);   opacity: 1; transform: translateY(calc(3.4vw - 50vh)) scale(0.53); }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  main,
-  .preloader,
-  .preloader img {
+  main {
     transition: none;
+  }
+  .preloader img {
+    animation: none;
+  }
+  .preloader.done img {
+    transform: translateY(calc(3.4vw - 50vh)) scale(0.53);
   }
   .hero .h1 .line > span,
   .subhead::before {
@@ -189,7 +222,10 @@ body.preloading main {
   align-content: center;
   justify-items: center;
   gap: 1.3889vw; /* 20px subhead -> h2 */
-  padding-bottom: 14vh; /* lifts the centered block ~7vh above true center */
+  min-height: 0; /* content-sized: 30vh in matches the old centered arrival, short tail so the video follows close */
+  padding: 30vh 0 12vh;
+  margin-top: -40vh; /* overlaps the unpinned hero's scroll-off — the last card is gone
+                        ~0.25vh after the pin, so the text arrives before the dead stretch */
 }
 .about .h2 {
   max-width: 60.1389vw; /* 866px */
@@ -207,11 +243,11 @@ body.preloading main {
   opacity: 0;
 }
 
-/* Video section — pinned; the frame grows from a centered 400px card to
+/* Video section — pinned; the frame grows from a centered 500px card to
    full viewport (15px side gutters) via initVideoExpand in custom.js. */
 .video-frame {
   position: relative;
-  height: 400px;
+  height: 500px;
   aspect-ratio: 16 / 9;
   border-radius: 5px;
   overflow: hidden;

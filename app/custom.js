@@ -185,7 +185,7 @@ function initHeroScroll() {
 
 /* --------------------------------------------------------------------------
    Video section: pins for one viewport-height while the frame scrubs from
-   its centered 400px rest size to 100vh x (100vw - 30px gutters). The video
+   its centered 500px rest size to 100vh x (100vw - 30px gutters). The video
    only plays once (nearly) expanded; the unmute button rides its corner.
    -------------------------------------------------------------------------- */
 function initVideoExpand() {
@@ -203,6 +203,7 @@ function initVideoExpand() {
     const setDim = () => {
       const near = enter * (1 - exit);
       window.__videoDim = expand * near; // lava darkens with the expansion
+      document.documentElement.style.setProperty("--video-dim", window.__videoDim); // LiquidEther fades (custom.css)
       window.__starDim = (0.45 + 0.55 * expand) * near; // stars start receding on approach
     };
     const OPEN = 0.6; // fraction of the pin spent growing; the rest holds full size
