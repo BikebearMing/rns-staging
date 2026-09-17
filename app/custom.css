@@ -20,8 +20,8 @@ body {
   z-index: -1;
 }
 
-/* ReactBits LiquidEther (liquid-ether.js) — replaces the lava shader as the
-   site background; dims as the video expands (--video-dim from custom.js) */
+/* ReactBits LiquidEther (liquid-ether.js) — alternate background on /ether
+   (app/ether/page.js); dims as the video expands (--video-dim from custom.js) */
 .ether {
   position: fixed;
   inset: 0;

@@ -166,9 +166,9 @@ const FRAGS = {
   }`,
 };
 
-// Lava shader hidden — LiquidEther (layout.js) is the background now; only the
-// preloader sequencing runs. /bg-2 (app/bg-2/page.js) brings the lava back.
-const hidden = () => !location.pathname.startsWith("/bg-2");
+// Lava is the site background. On /ether (app/ether/page.js) the LiquidEther
+// takes over and only the preloader sequencing runs here.
+const hidden = () => location.pathname.startsWith("/ether");
 
 export default function Lava() {
   const ref = useRef(null);
