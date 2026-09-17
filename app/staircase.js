@@ -34,14 +34,15 @@ const FRONT_Y = 0.79; /* rest height of the front card (REST_ANGLE compensated o
 const REST_ANGLE = -0.8; /* viewing pose: front card swung right + receded; cards cycle through it */
 const PITCH_START = 1.35; /* rest gap multiplier — cards sit further apart, closing to 1x across the scroll */
 const RADIUS_START = 0.85; /* rest helix radius multiplier — the swing peaks lower, opening to 1x across the scroll */
-const GROW_START = 0.72; /* cards rest small and scale up to 1 across the scroll */
-const CAM_Z = 7.4; /* rest camera (user: 6.2 was too close/large) — the front card reads mid-size, the zoom-out still has travel */
+const GROW_START = 0.85; /* cards rest slightly small and scale up to 1 across the scroll */
+const CAM_Z = 6.8; /* rest camera — 6.2 read too close (card cropped), 7.4 too small */
 /* Depth layer: the camera pulls BACK across the first slice of the pin
    (real parallax: the front card shrinks faster than the deep ones and more
    helix rises into view) — layered ON TOP of the spin, which runs over the
    whole pin from the first pixel. One motion, not two beats. */
 const RECEDE = 0.3; /* fraction of the pin the dolly-out is spread across */
 const DOLLY = 3; /* how far the camera backs off across that slice (lands at the same z as before) */
+const DOLLY_HOLD = 0.6; /* 0..1: how much of the dolly's shrink the CARDS cancel (bg still recedes fully) — user: images scaled down too much */
 const INTRO_DOLLY = 6; /* preloader arrival: camera starts this far BEYOND rest and flies in */
 const FOG_STEP = 0.3; /* per-step sink into depth shadow — deep cards darken toward near-black */
 const INTRO_STAG = 0.35; /* deeper cards lag the intro rise — the helix assembles top-first */
@@ -556,7 +557,8 @@ function Scene() {
     const spin = sp;
     // intro fly-in (introZ -> 0) and scroll dolly-out compose on one axis —
     // crossfading influences, no hand-off jump if the user scrolls early
-    camera.position.z = CAM_Z + v.introZ + DOLLY * rec * rec * (3 - 2 * rec);
+    const dolly = DOLLY * rec * rec * (3 - 2 * rec);
+    camera.position.z = CAM_Z + v.introZ + dolly;
     window.__camZ = camera.position.z; // debug/tuning readout
     // jelly: spring the bend toward scroll velocity — lags, overshoots, settles
     dt = Math.min(dt, 1 / 30); // clamp tab-switch spikes so the spring can't explode
@@ -579,7 +581,8 @@ function Scene() {
     // from below into the same REST_ANGLE pose
     v.spinTotal = v.off + sway + REST_ANGLE - (spin * (N - 1) + exit * EXIT_STEPS) * v.step;
     v.iFront = -v.spinTotal / v.step; // continuous front index; +N-1 by full scroll
-    v.grow = GROW_START + (1 - GROW_START) * spin; // small at rest, full size by the last card
+    // cards grow against the dolly so they keep more of their size while the bg pulls away
+    v.grow = (GROW_START + (1 - GROW_START) * spin) * (1 + (DOLLY_HOLD * dolly) / CAM_Z); // small at rest, full size by the last card
     v.pitchK = PITCH_START + (1 - PITCH_START) * spin; // wide gap at rest, original by the last card
     v.radiusK = RADIUS_START + (1 - RADIUS_START) * spin; // lower peak at rest, original by the last card
   });
